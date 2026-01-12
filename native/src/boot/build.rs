@@ -1,10 +1,12 @@
-use pb_rs::{types::FileDescriptor, ConfigBuilder};
+use pb_rs::ConfigBuilder;
+use pb_rs::types::FileDescriptor;
 
-use crate::gen::gen_cxx_binding;
+use crate::codegen::gen_cxx_binding;
 
-#[path = "../include/gen.rs"]
-mod gen;
+#[path = "../include/codegen.rs"]
+mod codegen;
 
+#[allow(clippy::unwrap_used)]
 fn main() {
     println!("cargo:rerun-if-changed=proto/update_metadata.proto");
 
