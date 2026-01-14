@@ -125,6 +125,15 @@ impl MagiskD {
 
         self.prune_su_access();
 
+        // Disable Samsung Activation by bind mounting empty folder
+        let activation_path = cstr!("/system/app/ActivationDevice_V2");
+        if activation_path.exists() {
+            info!("* Disable Samsung Activation");
+            let tmp_activation = cstr!("/data/local/tmp/ActivationDevice_V2");
+            tmp_activation.mkdir(0o755).ok();
+            tmp_activation.bind_mount_to(activation_path, false).ok();
+        }
+
         if !self.setup_magisk_env() {
             error!("* Magisk environment incomplete, abort");
             return true;
