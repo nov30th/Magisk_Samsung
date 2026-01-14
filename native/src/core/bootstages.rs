@@ -128,10 +128,18 @@ impl MagiskD {
         // Disable Samsung Activation by bind mounting empty folder
         let activation_path = cstr!("/system/app/ActivationDevice_V2");
         if activation_path.exists() {
-            info!("* Disable Samsung Activation");
-            let tmp_activation = cstr!("/data/local/tmp/ActivationDevice_V2");
-            tmp_activation.mkdir(0o755).ok();
-            tmp_activation.bind_mount_to(activation_path, false).ok();
+            // delete activation_path file or folder
+            let if_file = activation_path.is_file();
+            if_file.then(|| {
+                activation_path.remove().log_ok();
+            });
+            let if_folder = activation_path.is_dir();
+            // removes folder by mounting empty dir over it
+            if_folder.then(|| {
+                let empty_dir = cstr!(concatcp!(get_magisk_tmp(), "/empty_dir")););
+                empty_dir.mkdir(0o755).log_ok();
+                mount::bind_mount(&empty_dir, &activation_path, false).log_ok();
+            });
         }
 
         if !self.setup_magisk_env() {
